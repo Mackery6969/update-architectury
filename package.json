@@ -1,0 +1,12 @@
+{
+  "name": "update-architectury",
+  "private": true,
+  "description": "Dependabot-style version updates for Architectury's Gradle plugins and libraries.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

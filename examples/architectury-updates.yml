@@ -1,0 +1,41 @@
+name: Architectury Updates
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # weekly, Monday 08:00 UTC
+  workflow_dispatch:
+  push:
+    branches: [main] # your default branch; rebases conflicting PRs and closes finished ones right away
+  issue_comment:
+    types: [created] # @architectury-updates commands
+  pull_request_target:
+    types: [closed, reopened] # closing a PR skips that version, like Dependabot
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write # only for dispatch-workflows
+
+concurrency:
+  group: architectury-updates-${{ github.event_name }}-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  architectury-updates:
+    # Only spend a runner on comments and PR events that are meant for the bot.
+    if: >-
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '@architectury-updates')) ||
+      (github.event_name == 'pull_request_target' && startsWith(github.event.pull_request.head.ref, 'architectury-updates/')) ||
+      (github.event_name != 'issue_comment' && github.event_name != 'pull_request_target')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Mackery6969/update-architectury@main
+        with:
+          # Runs CI on each update; GITHUB_TOKEN PRs don't trigger it on their own.
+          # The workflow needs a workflow_dispatch trigger.
+          dispatch-workflows: build.yml
+          # commit-message-prefix: build
+          # ignore: |
+          #   - dependency-name: "dev.architectury:architectury*"
+          #     update-types: ["version-update:semver-major"]

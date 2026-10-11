@@ -1,0 +1,66 @@
+name: Architectury Updates
+description: Dependabot-style pull requests for Architectury's Gradle plugins and libraries, which Dependabot can't fetch.
+author: Mackery6969
+branding:
+  icon: package
+  color: blue
+
+inputs:
+  token:
+    description: Token for the GitHub API. The default GITHUB_TOKEN works when the workflow grants the permissions in the README.
+    default: ${{ github.token }}
+  directory:
+    description: Directory of the Gradle build to update, like Dependabot's `directory`. Gradle files below it are scanned too.
+    default: /
+  target-branch:
+    description: Branch to open pull requests against. Defaults to the repository's default branch.
+    default: ''
+  open-pull-requests-limit:
+    description: Maximum number of open pull requests. Superseding an open pull request is always allowed.
+    default: '5'
+  labels:
+    description: Labels for new pull requests (comma or newline separated). `dependencies` and `java` are created if missing; other missing labels are skipped.
+    default: dependencies, java
+  assignees:
+    description: Users to assign to new pull requests.
+    default: ''
+  reviewers:
+    description: Users or teams (`org/team`) to request reviews from.
+    default: ''
+  milestone:
+    description: Milestone number for new pull requests.
+    default: ''
+  commit-message-prefix:
+    description: Prefix for commit messages and pull request titles, like Dependabot's `commit-message.prefix`. Without it, the repository's recent commit style is followed.
+    default: ''
+  commit-message-include:
+    description: Set to `scope` to add `(deps)` after the prefix.
+    default: ''
+  rebase-strategy:
+    description: '`auto` rebases pull requests that have conflicts; `disabled` never does.'
+    default: auto
+  ignore:
+    description: Ignore conditions in dependabot.yml's format (a YAML list of `dependency-name`, `versions` and `update-types`).
+    default: ''
+  allow:
+    description: Only update dependencies matching these `dependency-name` patterns (YAML list). All Architectury dependencies are updated when empty.
+    default: ''
+  dispatch-workflows:
+    description: Workflow files (such as `build.yml`) to start on a pull request's branch after every update. Pull requests opened with GITHUB_TOKEN don't trigger workflows by themselves.
+    default: ''
+  registry:
+    description: Maven repository to read versions from.
+    default: https://maven.architectury.dev/
+  branch-prefix:
+    description: Prefix of the update branches. The workflow's `if:` filter must use the same prefix.
+    default: architectury-updates
+  branch-separator:
+    description: Separator used in branch names, like Dependabot's `pull-request-branch-name.separator`.
+    default: /
+  dry-run:
+    description: Log what would change without pushing, opening, closing or commenting on anything.
+    default: 'false'
+
+runs:
+  using: node24
+  main: src/index.js
