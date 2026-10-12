@@ -42,7 +42,7 @@ async function mapLimit(items, limit, fn) {
   return results;
 }
 
-const cell = (text) => String(text).replace(/\|/g, '\\|');
+const cell = (text) => String(text).replace(/[\\|]/g, '\\$&');
 
 const updateRecords = (updates) => updates.map(({ name, from, to }) => ({ name, from, to }));
 
