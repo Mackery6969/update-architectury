@@ -23,12 +23,13 @@ export function buildUnits(deps) {
     }
   }
   const groups = new Map();
-  for (const dep of deps) {
-    const root = find(`dep:${dep.name}`);
-    if (!groups.has(root)) groups.set(root, []);
-    groups.get(root).push(dep);
-  }
+  for (const dep of deps) pushTo(groups, find(`dep:${dep.name}`), dep);
   return [...groups.values()].map(unitOf).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function pushTo(map, key, item) {
+  if (!map.has(key)) map.set(key, []);
+  map.get(key).push(item);
 }
 
 function unitOf(deps) {
@@ -74,10 +75,7 @@ export function planUpdate(snapshot, targets) {
 
 function applyEdits(files, edits) {
   const byFile = new Map();
-  for (const edit of edits) {
-    if (!byFile.has(edit.source.file)) byFile.set(edit.source.file, []);
-    byFile.get(edit.source.file).push(edit);
-  }
+  for (const edit of edits) pushTo(byFile, edit.source.file, edit);
   const changed = new Map();
   for (const [file, fileEdits] of byFile) {
     let content = files.get(file);
