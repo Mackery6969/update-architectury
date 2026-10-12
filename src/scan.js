@@ -282,7 +282,8 @@ function findDefinition(script, name) {
     String.raw`(?:^|[\n;{])[ \t]*${n}[ \t]*=[ \t]*`,
   ];
   for (const pattern of patterns) {
-    for (const match of script.src.matchAll(new RegExp(pattern, 'g'))) {
+    // Fixed patterns; `name` is inserted only after escapeRegExp, so it matches literally.
+    for (const match of script.src.matchAll(new RegExp(pattern, 'g'))) { // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
       if (script.inComment(match.index + match[0].search(/\S/))) continue;
       const token = script.byStart.get(match.index + match[0].length);
       if (token && !token.content.includes('$')) return token;

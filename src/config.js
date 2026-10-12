@@ -11,7 +11,8 @@ export function globPattern(pattern) {
     .split('*')
     .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
     .join('.*');
-  return new RegExp(`^${source}$`, 'i');
+  // Every regex metacharacter is escaped above; only `*` becomes `.*`, from the workflow's own config.
+  return new RegExp(`^${source}$`, 'i'); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
 }
 
 // Architectury's Gradle plugins and its dev.architectury artifacts.
