@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - uses: Mackery6969/Claude-Autofix@v1
+      - uses: Mackery6969/Claude-Autofix@v2
         with:
           task: quality
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
