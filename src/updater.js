@@ -42,7 +42,9 @@ async function mapLimit(items, limit, fn) {
   return results;
 }
 
-const cell = (text) => String(text).replace(/\|/g, '\\|');
+const cell = (text) => String(text).replace(/[\\|]/g, '\\$&');
+
+const updateRecords = (updates) => updates.map(({ name, from, to }) => ({ name, from, to }));
 
 export class Updater {
   constructor({ github, registry, config, log, sleep }) {
@@ -330,7 +332,7 @@ export class Updater {
     await this.github.setBranch(branch, sha);
     const meta = {
       directory: this.config.directory,
-      dependencies: plan.updates.map(({ name, from, to }) => ({ name, from, to })),
+      dependencies: updateRecords(plan.updates),
       head: sha,
     };
     let note = this.needsNote(this.tokenUser);
@@ -361,7 +363,7 @@ export class Updater {
     const description = await this.describe(plan);
     const sha = await this.commit(snapshot, plan.files, description.commitMessage);
     await this.github.setBranch(pr.headRef, sha);
-    const meta = { ...pr.meta, dependencies: plan.updates.map(({ name, from, to }) => ({ name, from, to })), head: sha, closed: undefined };
+    const meta = { ...pr.meta, dependencies: updateRecords(plan.updates), head: sha, closed: undefined };
     const body = pullBody(description, meta, { note: this.needsNote(pr.author) });
     await this.github.updatePull(pr.number, { title: description.title, body });
     Object.assign(pr, { title: description.title, body, meta, headSha: sha });

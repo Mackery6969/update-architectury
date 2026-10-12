@@ -186,6 +186,8 @@ function skipSpace(reader) {
   while (/\s/.test(reader.text[reader.pos] ?? '')) reader.pos++;
 }
 
+const ESCAPES = { n: '\n', t: '\t', r: '\r', '"': '"', '\\': '\\', '/': '/', '0': '\0' };
+
 function readQuoted(text, start, state, line) {
   const quote = text[start];
   let value = '';
@@ -206,12 +208,11 @@ function readQuoted(text, start, state, line) {
     if (c === '"') return { value, end: i + 1 };
     if (c === '\\') {
       const next = text[++i];
-      const escapes = { n: '\n', t: '\t', r: '\r', '"': '"', '\\': '\\', '/': '/', '0': '\0' };
       if (next === 'u') {
         value += String.fromCharCode(parseInt(text.slice(i + 1, i + 5), 16));
         i += 4;
       } else {
-        value += escapes[next] ?? next;
+        value += ESCAPES[next] ?? next;
       }
       continue;
     }
