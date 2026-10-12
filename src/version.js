@@ -55,20 +55,21 @@ export function compareVersions(a, b) {
   return 0;
 }
 
-export function maxVersion(versions) {
+// The first version for which `sign` agrees with the comparison against the best so far.
+function pickVersion(versions, sign) {
   let best = null;
   for (const version of versions) {
-    if (best === null || compareVersions(version, best) > 0) best = version;
+    if (best === null || Math.sign(compareVersions(version, best)) === sign) best = version;
   }
   return best;
 }
 
+export function maxVersion(versions) {
+  return pickVersion(versions, 1);
+}
+
 export function minVersion(versions) {
-  let best = null;
-  for (const version of versions) {
-    if (best === null || compareVersions(version, best) < 0) best = version;
-  }
-  return best;
+  return pickVersion(versions, -1);
 }
 
 export function isPrerelease(version) {
