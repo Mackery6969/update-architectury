@@ -23,14 +23,20 @@ export function pullTitle({ updates, property }, directory, style) {
   return `${style.prefix}${bump} ${subject}${directory === '/' ? '' : ` in ${directory}`}`;
 }
 
-function intro({ updates, property }) {
+// The opening sentence for a group of updates that move together.
+function groupHeading({ updates, property }) {
+  return property
+    ? `Bumps \`${property}\` from ${minVersion(updates.map((u) => u.from))} to ${updates[0].to}.`
+    : `Bumps ${joinWords(updates.map(link))}. These dependencies needed to be updated together.`;
+}
+
+function intro(description) {
+  const { updates } = description;
   if (updates.length === 1) {
     const [update] = updates;
     return [`Bumps ${link(update)} from ${update.from} to ${update.to}.`, update.notes].filter(Boolean).join('\n');
   }
-  const heading = property
-    ? `Bumps \`${property}\` from ${minVersion(updates.map((u) => u.from))} to ${updates[0].to}.`
-    : `Bumps ${joinWords(updates.map(link))}. These dependencies needed to be updated together.`;
+  const heading = groupHeading(description);
   const sections = updates.map((update) => [`Updates \`${update.name}\` from ${update.from} to ${update.to}`, update.notes].filter(Boolean).join('\n'));
   return [heading, sections.join('\n\n')].join('\n');
 }
@@ -42,11 +48,7 @@ export function commitMessage(description, title) {
     const [update] = description.updates;
     lines.push(`Bumps ${link(update)} from ${update.from} to ${update.to}.`, ...notes(update));
   } else {
-    lines.push(
-      description.property
-        ? `Bumps \`${description.property}\` from ${minVersion(description.updates.map((u) => u.from))} to ${description.updates[0].to}.`
-        : `Bumps ${joinWords(description.updates.map(link))}. These dependencies needed to be updated together.`,
-    );
+    lines.push(groupHeading(description));
     for (const update of description.updates) lines.push('', `Updates \`${update.name}\` from ${update.from} to ${update.to}`, ...notes(update));
   }
   lines.push('', '---', 'updated-dependencies:');
