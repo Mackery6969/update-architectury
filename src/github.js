@@ -115,16 +115,20 @@ export class GitHubClient {
     return { defaultBranch: data.default_branch, allowMergeCommit: data.allow_merge_commit, allowSquashMerge: data.allow_squash_merge };
   }
 
+  async getBranchRef(branch) {
+    const { data } = await this.request('GET', `${this.path}/git/ref/heads/${refPath(branch)}`, { allow: [404] });
+    return data;
+  }
+
   async getBranchHead(branch) {
-    const { data: ref } = await this.request('GET', `${this.path}/git/ref/heads/${refPath(branch)}`, { allow: [404] });
+    const ref = await this.getBranchRef(branch);
     if (!ref) return null;
     const { data: commit } = await this.request('GET', `${this.path}/git/commits/${ref.object.sha}`);
     return { sha: commit.sha, treeSha: commit.tree.sha };
   }
 
   async branchExists(branch) {
-    const { data } = await this.request('GET', `${this.path}/git/ref/heads/${refPath(branch)}`, { allow: [404] });
-    return Boolean(data);
+    return Boolean(await this.getBranchRef(branch));
   }
 
   async getTree(treeSha) {
