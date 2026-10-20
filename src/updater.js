@@ -542,8 +542,10 @@ export class Updater {
     try {
       return ['admin', 'write'].includes(await this.github.permission(user));
     } catch (error) {
-      this.log.warning(`Could not read ${user}'s permission (${error.message}); using their association with the repository instead.`);
-      return ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(association);
+      // MEMBER and COLLABORATOR don't imply write access (read-only collaborators,
+      // org members without repository access), so only the owner is trusted here.
+      this.log.warning(`Could not read ${user}'s permission (${error.message}); only the repository owner is trusted instead.`);
+      return association === 'OWNER';
     }
   }
 
