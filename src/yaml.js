@@ -20,6 +20,7 @@ export function parseYaml(text, label = 'input') {
     if (indentation.includes('\t')) throw yamlError(label, index + 1, 'tabs are not allowed for indentation');
     lines.push({ indent: indentation.length, text: content.slice(indentation.length), line: index + 1 });
   });
+  if (!lines.length) return null;
   const state = { lines, index: 0, label };
   const value = parseNode(state, lines[0].indent);
   if (state.index < lines.length) throw yamlError(label, lines[state.index].line, 'unexpected indentation');
