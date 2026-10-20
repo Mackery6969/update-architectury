@@ -50,7 +50,7 @@ const escapeHtml = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').r
 export function sanitizeNotes(text, repository) {
   return text
     .replace(/<!--/g, '&lt;!--')
-    .replace(/^(\s*)\[\/\/\]:/gm, '$1\\[//]:')
+    .replace(/\[\/\/\]:/g, '\\[//\\]:')
     .replace(/https:\/\/github\.com\/([\w.-]+\/[\w.-]+\/(?:issues|pull|discussions)\/\d+)/g, 'https://redirect.github.com/$1')
     .replace(/(^|[^\w/`[])([\w.-]+\/[\w.-]+)#(\d+)\b/g, (match, before, repo, number) => `${before}[${repo}#${number}](https://redirect.github.com/${repo}/issues/${number})`)
     .replace(/(^|[^\w/&`[])#(\d+)\b/g, (match, before, number) => `${before}[#${number}](https://redirect.github.com/${repository}/issues/${number})`)
