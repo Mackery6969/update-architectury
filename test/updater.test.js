@@ -189,6 +189,7 @@ test('rebases conflicting pull requests unless someone else edited them', async 
   const loom = github.pull(2);
   loom.mergeable = false;
   const before = github.branches.get(loom.headRef);
+  const pluginBefore = github.branches.get(github.pull(1).headRef);
 
   const { errors } = await push(github);
   assert.deepEqual(errors, [], 'a push does not read the registry');
@@ -197,7 +198,7 @@ test('rebases conflicting pull requests unless someone else edited them', async 
   assert.equal(github.commits.get(after).parent, github.branches.get('main'));
   assert.equal(github.file(loom.headRef, 'build.gradle.kts'), changed.replace('1.14.473', '1.17.493'));
   assert.equal(readMeta(loom.body).head, after);
-  assert.equal(github.branches.get(github.pull(1).headRef), github.branches.get(github.pull(1).headRef), 'mergeable PRs are left alone');
+  assert.equal(github.branches.get(github.pull(1).headRef), pluginBefore, 'mergeable PRs are left alone');
 
   github.push(loom.headRef, { 'notes.txt': 'manual fix' });
   const edited = github.branches.get(loom.headRef);
