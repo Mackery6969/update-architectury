@@ -510,8 +510,17 @@ export class Updater {
       await this.github.deleteBranch(pr.headRef);
       return;
     }
+    await this.reinstate(pr);
+  }
+
+  // A reopened PR loses its close/ignore state and, unless edited, is recreated on the latest base.
+  async reinstate(pr) {
     await this.saveMeta(pr, { ...pr.meta, closed: undefined, ignore: undefined });
     if (!this.isEdited(pr)) await this.recreate(pr, await this.snapshot());
+  }
+
+  commentNotOpen(pr) {
+    return this.github.comment(pr.number, pr.merged ? comments.alreadyMerged() : comments.notOpen());
   }
 
   async onComment(payload) {
@@ -553,7 +562,7 @@ export class Updater {
     switch (command.type) {
       case 'rebase':
       case 'recreate':
-        if (pr.state !== 'open') return this.github.comment(pr.number, pr.merged ? comments.alreadyMerged() : comments.notOpen());
+        if (pr.state !== 'open') return this.commentNotOpen(pr);
         if (command.type === 'rebase' && this.isEdited(pr)) return this.github.comment(pr.number, comments.edited());
         return this.recreate(pr, await this.snapshot());
       case 'merge':
@@ -578,7 +587,7 @@ export class Updater {
   }
 
   async requestMerge(pr, user, method) {
-    if (pr.state !== 'open') return this.github.comment(pr.number, pr.merged ? comments.alreadyMerged() : comments.notOpen());
+    if (pr.state !== 'open') return this.commentNotOpen(pr);
     const { repo } = await this.base();
     if (method === 'merge' && repo.allowMergeCommit === false) method = repo.allowSquashMerge === false ? 'rebase' : 'squash';
     try {
@@ -600,8 +609,7 @@ export class Updater {
     if (!(await this.github.branchExists(pr.headRef))) await this.github.setBranch(pr.headRef, pr.headSha);
     await this.github.updatePull(pr.number, { state: 'open' });
     pr.state = 'open';
-    await this.saveMeta(pr, { ...pr.meta, closed: undefined, ignore: undefined });
-    if (!this.isEdited(pr)) await this.recreate(pr, await this.snapshot());
+    await this.reinstate(pr);
   }
 
   async ignore(pr, command) {
